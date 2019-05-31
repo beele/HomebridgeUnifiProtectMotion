@@ -90,8 +90,6 @@ UnifiProtectMotionPlatform.prototype = {
             platform.flows.detectMotionFlow().then((motionEnhancedSensors) => {
 
                 outer: for (const sensor of motionEnhancedSensors) {
-                    platform.log(sensor.name + ' : ' + motionEnhancedSensors.motion ? 'motion' : 'no motion');
-
                     for (const accessory of platform.accessories) {
                         if (sensor.id === accessory.context.id) {
                             accessory.context.hasMotion = sensor.motion;
