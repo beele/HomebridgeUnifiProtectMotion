@@ -1,0 +1,32 @@
+{
+  "name": "homebridge-unifi-protect-motion-sensors",
+  "version": "0.0.1",
+  "description": "Unifi protected camera motion sensors for domotics integrations with HomeBridge",
+  "main": "src/index.js",
+  "dependencies": {
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.5"
+  },
+  "devDependencies": {
+    "jest": "^24.1.0"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "homebridge-plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "bugs": {
+    "url": ""
+  },
+  "engines": {
+    "node": ">=10.15.1",
+    "homebridge": ">=0.4.46"
+  },
+  "author": "Kevin Van den Abeele",
+  "license": "GNU GPLv3"
+}
