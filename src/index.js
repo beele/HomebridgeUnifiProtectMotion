@@ -60,8 +60,11 @@ function UnifiProtectMotionPlatform(log, config, api) {
                 platform.flows.authenticationFlow()
                     .then(() => {
                         platform.log('Authenticated, session stored!');
-                        platform.motionCheck();
-                    })
+                        platform.flows.enumerateMotionSensorsFlow()
+                            .then(() => {
+                                platform.motionCheck();
+                            })
+                    });
             } else {
                 platform.log('No Accessories in cache, creating...');
                 platform.flows.enumerateMotionSensorsFlow()
@@ -80,12 +83,17 @@ function UnifiProtectMotionPlatform(log, config, api) {
 }
 
 UnifiProtectMotionPlatform.prototype = {
-    motionCheck: function() {
+    motionCheck: function () {
+        const platform = this;
+
         setInterval(() => {
-            platform.flows.detectMotionFlow((motionEnhancedSensors) => {
+            platform.flows.detectMotionFlow().then((motionEnhancedSensors) => {
+
                 outer: for (const sensor of motionEnhancedSensors) {
+                    platform.log(sensor.name + ' : ' + motionEnhancedSensors.motion ? 'motion' : 'no motion');
+
                     for (const accessory of platform.accessories) {
-                        if(sensor.id === accessory.context.id) {
+                        if (sensor.id === accessory.context.id) {
                             accessory.context.hasMotion = sensor.motion;
                             accessory.getService(Service.MotionSensor)
                                 .setCharacteristic(Characteristic.MotionDetected, sensor.motion);

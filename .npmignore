@@ -1,2 +1,4 @@
 src/experimental
-.idea
+     .idea
+     .travis.yml
+     *.iml
