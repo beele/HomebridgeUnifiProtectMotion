@@ -125,7 +125,6 @@ module.exports.Unifi = function (controller, initialBackoffDelay, maxRetries, lo
 
         return me
             .backoff(me.maxRetries, () => {
-                me.log('Trying to detect motion...');
                 return request.get(opts);
             })
             .then((response) => {
@@ -133,7 +132,6 @@ module.exports.Unifi = function (controller, initialBackoffDelay, maxRetries, lo
                     this.log(response.body);
                     return Promise.reject(response.body);
                 } else {
-                    me.log('Detecting motion');
                     const events = response.body;
 
                     outer: for (const sensor of sensors) {
