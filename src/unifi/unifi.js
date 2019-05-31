@@ -1,10 +1,11 @@
 const request = require('request-promise-native');
 
-module.exports.Unifi = function (controller, initialBackoffDelay, maxRetries, logger) {
+module.exports.Unifi = function (controller, motionIntervalDelay, initialBackoffDelay, maxRetries, logger) {
     const me = this;
     me.log = logger;
 
     me.controller = controller;
+    me.motionIntervaldelay = motionIntervalDelay;
 
     me.initialBackoffDelay = initialBackoffDelay;
     me.maxRetries = maxRetries;
@@ -110,7 +111,7 @@ module.exports.Unifi = function (controller, initialBackoffDelay, maxRetries, lo
 
     me.detectMotion = function (session, sensors) {
         const endEpoch = Date.now();
-        const startEpoch = endEpoch - 15000;
+        const startEpoch = endEpoch - me.motionIntervaldelay;
 
         const opts = {
             uri: me.controller + '/api/events?end=' + endEpoch +'&start=' + startEpoch + '&type=motion',
