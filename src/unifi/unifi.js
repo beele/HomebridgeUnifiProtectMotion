@@ -1,10 +1,11 @@
 const request = require('request-promise-native');
 
-module.exports.Unifi = function (controller, motionIntervalDelay, initialBackoffDelay, maxRetries, logger) {
+module.exports.Unifi = function (controller, motionScore, motionIntervalDelay, initialBackoffDelay, maxRetries, logger) {
     const me = this;
     me.log = logger;
 
     me.controller = controller;
+    me.motionScore = motionScore;
     me.motionIntervaldelay = motionIntervalDelay;
 
     me.initialBackoffDelay = initialBackoffDelay;
@@ -111,7 +112,7 @@ module.exports.Unifi = function (controller, motionIntervalDelay, initialBackoff
 
     me.detectMotion = function (session, sensors) {
         const endEpoch = Date.now();
-        const startEpoch = endEpoch - me.motionIntervaldelay;
+        const startEpoch = endEpoch - (me.motionIntervaldelay * 2);
 
         const opts = {
             uri: me.controller + '/api/events?end=' + endEpoch +'&start=' + startEpoch + '&type=motion',
@@ -139,7 +140,7 @@ module.exports.Unifi = function (controller, motionIntervalDelay, initialBackoff
                         sensor.motion = false;
 
                         for (const event of events) {
-                            if(sensor.id === event.camera) {
+                            if(sensor.id === event.camera && event.score >= me.motionScore) {
                                 sensor.motion = true;
                                 continue outer;
                             }

@@ -18,10 +18,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/beele/HomebridgeUnifiProtectMotion"
   },
   "bugs": {
-    "url": ""
+    "url": "https://github.com/beele/HomebridgeUnifiProtectMotion/issues"
   },
   "engines": {
     "node": ">=10.15.1",

@@ -12,6 +12,7 @@ Configuration example
         "controller": "url-to-controller",
         "username": "user@domain.tld",
         "password": "password",
+        "motionscore": "minimum-motion-score-in-percentage",
         "motioninterval": "delay-in-milliseconds",
         "delay": "delay-in-milliseconds",
         "retries": "number-of-retries"
@@ -41,6 +42,7 @@ function UnifiProtectMotionPlatform(log, config, api) {
     this.flows = new Flows(
         new Unifi(
             config['controller'],
+            config['motionscore'],
             config['motioninterval'],
             config['delay'],
             config['retries'],
