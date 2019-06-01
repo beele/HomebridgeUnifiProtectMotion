@@ -29,7 +29,7 @@ module.exports.RequestMocking = function () {
         return mock;
     };
 
-    me.mockCamerasGetRequest = function (succeedAfterAttempt = -1) {
+    me.mockCamerasGetRequest = function (succeedAfterAttempt = -1, responseContainsError = false) {
         const mock = jest.spyOn(request, 'get');
 
         let count = 0;
@@ -42,6 +42,9 @@ module.exports.RequestMocking = function () {
                 if (count++ < succeedAfterAttempt) {
                     return Promise.reject('dummy-fail');
                 } else {
+                    if (responseContainsError) {
+                        return Promise.resolve({error: 'dummy-fail'});
+                    }
                     return Promise.resolve(me.getCamerasReplyData());
                 }
             }
@@ -89,40 +92,4 @@ module.exports.RequestMocking = function () {
         });
         return mock;
     };
-
-    me.mockAuthenticationAndPlugsGetRequests = function (succeedAfterAttempt = -1, responseContainsError = false, callToFail = -1) {
-        const mock = jest.spyOn(request, 'get');
-
-        let countCall1 = 0;
-        let countCall2 = 0;
-        mock.mockImplementation((opts) => {
-            console.log('Mock called');
-
-            if (opts.uri === 'https://cloud.homewizard.com/account/login') {
-                if (callToFail === 1) {
-                    return Promise.reject('dummy-fail');
-                } else {
-                    if (countCall1++ < succeedAfterAttempt) {
-                        return Promise.reject('dummy-fail');
-                    } else {
-                        if (responseContainsError) {
-                            return Promise.resolve({error: 110, message: 'dummy-fail'});
-                        }
-                        return Promise.resolve({session: 'dummy-session-token'});
-                    }
-                }
-            } else {
-                if (callToFail === 2) {
-                    return Promise.reject('dummy-fail');
-                } else {
-                    if (countCall2++ < succeedAfterAttempt) {
-                        return Promise.reject('dummy-fail');
-                    } else {
-                        return Promise.resolve(me.getPlugsReplyData());
-                    }
-                }
-            }
-        });
-        return mock;
-    }
 };
