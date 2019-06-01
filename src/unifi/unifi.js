@@ -40,7 +40,7 @@ module.exports.Unifi = function (controller, motionScore, motionIntervalDelay, i
                     return request.post(opts);
                 })
                 .then((response) => {
-                    if(!response.headers || !response.headers['authorization']) {
+                    if (!response.headers || !response.headers['authorization']) {
                         this.log(response.body);
                         return Promise.reject(response.body);
                     } else {
@@ -88,7 +88,7 @@ module.exports.Unifi = function (controller, motionScore, motionIntervalDelay, i
                 return request.get(opts);
             })
             .then((response) => {
-                if(!response.body.cameras) {
+                if (!response.body.cameras) {
                     this.log(response.body);
                     return Promise.reject(response.body);
                 } else {
@@ -115,7 +115,7 @@ module.exports.Unifi = function (controller, motionScore, motionIntervalDelay, i
         const startEpoch = endEpoch - (me.motionIntervaldelay * 2);
 
         const opts = {
-            uri: me.controller + '/api/events?end=' + endEpoch +'&start=' + startEpoch + '&type=motion',
+            uri: me.controller + '/api/events?end=' + endEpoch + '&start=' + startEpoch + '&type=motion',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + session.authorization
@@ -130,7 +130,7 @@ module.exports.Unifi = function (controller, motionScore, motionIntervalDelay, i
                 return request.get(opts);
             })
             .then((response) => {
-                if(response.body.error) {
+                if (response.body.error) {
                     this.log(response.body);
                     return Promise.reject(response.body);
                 } else {
@@ -140,9 +140,14 @@ module.exports.Unifi = function (controller, motionScore, motionIntervalDelay, i
                         sensor.motion = false;
 
                         for (const event of events) {
-                            if(sensor.id === event.camera && event.score >= me.motionScore) {
-                                sensor.motion = true;
-                                continue outer;
+                            if (sensor.id === event.camera) {
+                                if (event.score >= me.motionScore) {
+                                    sensor.motion = true;
+                                    me.log('Motion detected! Score: ' + event.score + ' for camera: ' + sensor.name);
+                                    continue outer;
+                                } else {
+                                    me.log('Motion rejected! Score: ' + event.score + ' for camera: ' + sensor.name);
+                                }
                             }
                         }
                     }
