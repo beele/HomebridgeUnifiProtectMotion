@@ -3,19 +3,20 @@ const Unifi = require("./unifi/unifi").Unifi;
 
 /*
 Configuration example
+See the readme for detailed information
 
 "platforms": [
     {
         "platform": "Unifi-Protect-Motion",
         "name": "display-name",
         "room": "room-name",
-        "controller": "url-to-controller",
+        "controller": "https://url-to-controller:7443",
         "username": "user@domain.tld",
         "password": "password",
-        "motionscore": "minimum-motion-score-in-percentage",
-        "motioninterval": "delay-in-milliseconds",
-        "delay": "delay-in-milliseconds",
-        "retries": "number-of-retries"
+        "motionscore": 50,
+        "motioninterval": 15000,
+        "delay": 500,
+        "retries": 2
     }
 ]
 */
@@ -56,56 +57,76 @@ function UnifiProtectMotionPlatform(log, config, api) {
     if (api) {
         platform.api = api;
 
-        platform.api.on('didFinishLaunching', function () {
+        platform.api.on('didFinishLaunching', () => {
             platform.log('Platform API loaded!');
 
             if (platform.accessories.length > 0) {
                 platform.log('Accessories restored from cache!');
-                platform.flows.authenticationFlow()
+                platform.flows
+                    .authenticationFlow()
                     .then(() => {
                         platform.log('Authenticated, session stored!');
-                        platform.flows.enumerateMotionSensorsFlow()
-                            .then(() => {
-                                platform.motionCheck();
-                            })
+                        return platform.flows.enumerateMotionSensorsFlow();
+                    })
+                    .then((sensors) => {
+                        platform.log('Checking for new and removed sensors...');
+                        const toAdd = sensors.filter(function(sensor) {
+                            return !platform.accessories.some(function(accessory) {
+                                return sensor.id === accessory.context.id;
+                            });
+                        });
+                        const toRemove = platform.accessories.filter(function(accessory) {
+                            return !sensors.some(function(sensor) {
+                                return accessory.context.id === sensor.id;
+                            });
+                        });
+                        toRemove.forEach((accessory) => {
+                            platform.removeAccessory(accessory);
+                        });
+                        toAdd.forEach((sensor) => {
+                            platform.addAccessory(sensor);
+                        });
+
+                        return Promise.resolve();
+                    })
+                    .then(() => {
+                        platform.setMotionCheckInterval();
+                        platform.checkMotion();
                     });
             } else {
                 platform.log('No Accessories in cache, creating...');
-                platform.flows.enumerateMotionSensorsFlow()
+                platform.flows
+                    .enumerateMotionSensorsFlow()
                     .then((sensors) => {
                         for (const sensor of sensors) {
                             platform.addAccessory(sensor);
                         }
-                        platform.motionCheck();
+                        platform.setMotionCheckInterval();
+                        platform.checkMotion();
                     })
                     .catch((error) => {
                         platform.log("Could not get sensors: " + error);
                     });
             }
-        }.bind(this));
+        });
     }
 }
 
 UnifiProtectMotionPlatform.prototype = {
-    motionCheck: function () {
+    setMotionCheckInterval: function () {
+        setInterval(this.checkMotion.bind(this), 15000);
+    },
+
+    checkMotion: function () {
         const platform = this;
 
-        setInterval(() => {
-            platform.flows.detectMotionFlow().then((motionEnhancedSensors) => {
-
-                outer: for (const sensor of motionEnhancedSensors) {
-                    for (const accessory of platform.accessories) {
-                        if (sensor.id === accessory.context.id) {
-                            accessory.context.hasMotion = sensor.motion;
-                            accessory.getService(Service.MotionSensor)
-                                .setCharacteristic(Characteristic.MotionDetected, sensor.motion);
-                            continue outer;
-                        }
-                    }
-
-                }
-            });
-        }, 15000);
+        platform.flows.detectMotionFlow(platform.accessories).then((accessoriesWithMotionInfo) => {
+            for (const accessoryWithMotionInfo of accessoriesWithMotionInfo) {
+                accessoryWithMotionInfo
+                    .getService(Service.MotionSensor)
+                    .setCharacteristic(Characteristic.MotionDetected, accessoryWithMotionInfo.context.hasMotion);
+            }
+        });
     },
 
     addAccessory: function (sensor) {
@@ -120,6 +141,7 @@ UnifiProtectMotionPlatform.prototype = {
         platform.api.registerPlatformAccessories('homebridge-unifi-protect-motion', 'Unifi-Protect-Motion', [newAccessory]);
         platform.configureAccessory(newAccessory);
     },
+
     configureAccessory: function (accessory) {
         const platform = this;
         platform.accessories.push(accessory);
@@ -144,21 +166,13 @@ UnifiProtectMotionPlatform.prototype = {
         });
     },
 
-    //TODO: When restoring from cache, check available vs cached switches, delete ones that are no longer available and create new ones!
-    removeAccessory: function (name) {
+    removeAccessory: function (accessory) {
         const platform = this;
-        platform.log('Delete requested for: ' + name);
+        platform.log('Deleting for accessory: ' + accessory.displayName);
 
-        let switchToRemove;
-        platform.accessories.forEach(value => {
-            if (value.displayName === name) {
-                switchToRemove = value;
-            }
-        });
-
-        if (switchToRemove) {
-            platform.api.unregisterPlatformAccessories('homebridge-unifi-protect-motion', 'Unifi-Protect-Motion', [switchToRemove]);
-            platform.accessories.splice(platform.accessories.indexOf(switchToRemove), 1);
+        if (accessory) {
+            platform.api.unregisterPlatformAccessories('homebridge-unifi-protect-motion', 'Unifi-Protect-Motion', [accessory]);
+            platform.accessories.splice(platform.accessories.indexOf(accessory), 1);
         }
     }
 };

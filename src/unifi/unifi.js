@@ -110,7 +110,7 @@ module.exports.Unifi = function (controller, motionScore, motionIntervalDelay, i
             });
     };
 
-    me.detectMotion = function (session, sensors) {
+    me.detectMotion = function (session, accessories) {
         const endEpoch = Date.now();
         const startEpoch = endEpoch - (me.motionIntervaldelay * 2);
 
@@ -136,22 +136,22 @@ module.exports.Unifi = function (controller, motionScore, motionIntervalDelay, i
                 } else {
                     const events = response.body;
 
-                    outer: for (const sensor of sensors) {
-                        sensor.motion = false;
+                    outer: for (const accessory of accessories) {
+                        accessory.context.hasMotion = false;
 
                         for (const event of events) {
-                            if (sensor.id === event.camera) {
+                            if (accessory.context.id === event.camera) {
                                 if (event.score >= me.motionScore) {
-                                    sensor.motion = true;
-                                    me.log('Motion detected! Score: ' + event.score + ' for camera: ' + sensor.name);
-                                    continue outer;
+                                    accessory.context.hasMotion = true;
+                                    me.log('Motion detected! Score: ' + event.score + ' for camera: ' + accessory.displayName);
                                 } else {
-                                    me.log('Motion rejected! Score: ' + event.score + ' for camera: ' + sensor.name);
+                                    me.log('Motion rejected! Score: ' + event.score + ' for camera: ' + accessory.displayName);
                                 }
+                                continue outer;
                             }
                         }
                     }
-                    return Promise.resolve(sensors);
+                    return Promise.resolve(accessories);
                 }
             });
     };

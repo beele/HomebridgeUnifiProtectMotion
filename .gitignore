@@ -2,3 +2,7 @@
 *.iml
 node_modules
 src/experimental
+
+resources/test-config/accessories/
+
+resources/test-config/persist/

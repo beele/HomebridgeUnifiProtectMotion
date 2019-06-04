@@ -77,12 +77,12 @@ test('Flows-enumerateMotionSensorsFlow-not-preauthenticated', done => {
     const flows = new Flows(unifi, 'dummy-username', 'dummy-password', logger);
 
     flows.enumerateMotionSensorsFlow()
-        .then(() => {
+        .then((sensors) => {
             expect(flows.session).not.toBeUndefined();
             expect(flows.session).not.toBeNull();
-            expect(flows.sensors).not.toBeUndefined();
-            expect(flows.sensors).not.toBeNull();
-            expect(flows.sensors.length).toEqual(2);
+            expect(sensors).not.toBeUndefined();
+            expect(sensors).not.toBeNull();
+            expect(sensors.length).toEqual(2);
 
             expect(m1).toBeCalledTimes(2);
             expect(m2).toBeCalledTimes(2);
@@ -103,10 +103,10 @@ test('Flows-enumerateMotionSensorsFlow-preauthenticated', done => {
     };
 
     flows.enumerateMotionSensorsFlow()
-        .then(() => {
-            expect(flows.sensors).not.toBeUndefined();
-            expect(flows.sensors).not.toBeNull();
-            expect(flows.sensors.length).toEqual(2);
+        .then((sensors) => {
+            expect(sensors).not.toBeUndefined();
+            expect(sensors).not.toBeNull();
+            expect(sensors.length).toEqual(2);
 
             expect(requestMock).toBeCalledTimes(2);
 
@@ -172,7 +172,7 @@ test('Flows-detectMotionFlow-not-preauthenticated', done => {
         {id: 'cam-2'}
     ];
 
-    flows.detectMotionFlow()
+    flows.detectMotionFlow([{context: {id: 'cam-1'}}, {context: {id: 'cam-2'}}])
         .then((result) => {
             expect(result).not.toBeUndefined();
             expect(result).not.toBeNull();
@@ -205,7 +205,7 @@ test('Flows-detectMotionFlow-preauthenticated', done => {
         {id: 'cam-2'}
     ];
 
-    flows.detectMotionFlow()
+    flows.detectMotionFlow([{context: {id: 'cam-1'}}, {context: {id: 'cam-2'}}])
         .then((result) => {
             expect(result).not.toBeUndefined();
             expect(result).not.toBeNull();
@@ -228,7 +228,7 @@ test('Flows-detectMotionFlow-unsuccessful-state', done => {
     const unifi = new Unifi('https://dummy-host', 50, 10000, 1000, 3, logger);
     const flows = new Flows(unifi, 'dummy-username', 'dummy-password', logger);
 
-    flows.detectMotionFlow()
+    flows.detectMotionFlow([{context: {id: 'cam-1'}}, {context: {id: 'cam-2'}}])
         .then((result) => {
             fail('No resolve should occur!');
         })
@@ -250,7 +250,7 @@ test('Flows-detectMotionFlow-authenticate-unreachable', done => {
     const unifi = new Unifi('https://dummy-host', 50, 10000, 1000, 3, logger);
     const flows = new Flows(unifi, 'dummy-username', 'dummy-password', logger);
 
-    flows.detectMotionFlow()
+    flows.detectMotionFlow([{context: {id: 'cam-1'}}, {context: {id: 'cam-2'}}])
         .then((result) => {
             fail('No resolve should occur!');
         })
@@ -272,7 +272,7 @@ test('Flows-detectMotionFlow-setSwitchState-unreachable', done => {
     const unifi = new Unifi('https://dummy-host', 50, 10000, 1000, 3, logger);
     const flows = new Flows(unifi, 'dummy-username', 'dummy-password', logger);
 
-    flows.detectMotionFlow()
+    flows.detectMotionFlow([{context: {id: 'cam-1'}}, {context: {id: 'cam-2'}}])
         .then((result) => {
             fail('No resolve should occur!');
         })

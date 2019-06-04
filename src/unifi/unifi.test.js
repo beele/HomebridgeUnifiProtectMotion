@@ -214,7 +214,7 @@ test('Unifi-detectMotion-successful', done => {
     };
 
     const unifi = new Unifi('https://dummy-host', 50, 10000, 1000, 3, (message) => console.log(message));
-    unifi.detectMotion(session, [{id: 'cam-1'}, {id: 'cam-2'}])
+    unifi.detectMotion(session, [{context: {id: 'cam-1'}}, {context: {id: 'cam-2'}}])
         .then((sensors) => {
             expect(sensors).not.toBeNull();
             expect(sensors.length).toEqual(2);
@@ -234,7 +234,7 @@ test('Unifi-detectMotion-successful-unreachable-first-time', done => {
     };
 
     const unifi = new Unifi('https://dummy-host', 50, 10000, 1000, 3, (message) => console.log(message));
-    unifi.detectMotion(session, [{id: 'cam-1'}, {id: 'cam-2'}])
+    unifi.detectMotion(session, [{context: {id: 'cam-1'}}, {context: {id: 'cam-2'}}])
         .then((sensors) => {
             expect(sensors).not.toBeNull();
             expect(sensors.length).toEqual(2);
@@ -254,7 +254,7 @@ test('Unifi-detectMotion-unreachable', done => {
     };
 
     const unifi = new Unifi('https://dummy-host', 50, 10000, 1000, 3, (message) => console.log(message));
-    unifi.detectMotion(session, [{id: 'cam-1'}, {id: 'cam-2'}])
+    unifi.detectMotion(session, [{context: {id: 'cam-1'}}, {context: {id: 'cam-2'}}])
         .then((sensors) => {
             fail('setSwitchState should not return data when the service is unreachable');
         })

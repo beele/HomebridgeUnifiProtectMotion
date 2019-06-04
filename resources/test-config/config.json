@@ -1,0 +1,26 @@
+{
+  "bridge": {
+    "name": "test-bridge",
+    "username": "00:11:22:33:44:55",
+    "port": 51826,
+    "pin": "000-00-000"
+  },
+  "description": "Test configuration for local homebridge, test purposes only!",
+  "accessories": [
+
+  ],
+  "platforms": [
+    {
+      "platform": "Unifi-Protect-Motion",
+      "name": "Unifi motion sensors",
+      "room": "Dummy Room",
+      "controller": "https://cloud-key-ip:7443",
+      "motionscore": 50,
+      "motioninterval": 10000,
+      "username": "user@domain.tld",
+      "password": "password",
+      "delay": 500,
+      "retries": 2
+    }
+  ]
+}

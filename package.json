@@ -1,6 +1,6 @@
 {
   "name": "homebridge-unifi-protect-motion-sensors",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Unifi protected camera motion sensors for domotics integrations with HomeBridge",
   "main": "src/index.js",
   "dependencies": {
@@ -11,7 +11,9 @@
     "jest": "^24.1.0"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "install-homebridge": "sudo npm install -g --unsafe-perm homebridge",
+    "debug-plugin": "homebridge -P . -U ./resources/test-config"
   },
   "keywords": [
     "homebridge-plugin"

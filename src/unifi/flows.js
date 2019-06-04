@@ -6,9 +6,7 @@ module.exports.Flows = function (unifi, username, password, logger) {
 
     me.username = username;
     me.password = password;
-
     me.session = null;
-    me.sensors = null;
 
     me.authenticationFlow = function () {
         return me.unifi.isSessionStillValid(me.session)
@@ -31,7 +29,6 @@ module.exports.Flows = function (unifi, username, password, logger) {
                 return me.unifi.enumerateMotionSensorsForCameras(me.session);
             })
             .then((sensors) => {
-                me.sensors = sensors;
                 return Promise.resolve(sensors);
             })
             .catch((error) => {
@@ -42,10 +39,10 @@ module.exports.Flows = function (unifi, username, password, logger) {
             });
     };
 
-    me.detectMotionFlow = function() {
+    me.detectMotionFlow = function(accessories) {
         return me.authenticationFlow()
             .then(() => {
-                return me.unifi.detectMotion(me.session, me.sensors);
+                return me.unifi.detectMotion(me.session, accessories);
             })
             .then((motionEnrichedSensors) => {
                 return Promise.resolve(motionEnrichedSensors);

@@ -4,6 +4,12 @@
 
 This Homebridge plugin generates a motion sensor per unifi protect camera that is registered on the provided account.
 
+To experiment with this plugin:
+- Checkout the git repo
+- Install Homebridge (you can use `npm run install-homebridge`)
+- Adjust the dummy config under `resources/test-config`
+- use `npm run debug-plugin` to start a homebridge instance that points to the local config
+
 To install this plugin simple type `sudo npm install homebridge-unifi-protect-motion-sensors -g --unsafe-perm=true`.
 Next open the config.json that contains your Homebridge configuration and add a block like the following one to the platforms array:
 
@@ -15,21 +21,22 @@ Next open the config.json that contains your Homebridge configuration and add a 
     "controller": "url-to-controller",
     "username": "user@domain.tld",
     "password": "password",
-    "motionscore": "minimum-motion-score-in-percentage",
-    "motioninterval": "delay-in-milliseconds",
-    "delay": "delay-in-milliseconds",
-    "retries": "number-of-retries"
+    "motionscore": 50,
+    "motioninterval": 15000,
+    "delay": 500,
+    "retries": 2
 }
 ```
+Config fields:
 
-The platform name has to be `Unifi-Protect-Motion` to link to the plugin.<br/>
-The `name` and `room` fields are for the display name and room name inside of the HomeKit app.<br/>
-The `controller` field is the bare url where your unifi protect is hosted (cloud key gen2+), most likely `https://cloud-key-ip:7443`.<br/>
-The `username` and `password` fields are your unifi protect login credentials.<br/>
-The `motionscore` field is the minimum score that will register as a motion event. The default in the unifi protect software is 50 (0 to 100, omit the % sign).<br/>
-The `motioninterval` field is the amount of milliseconds that are between each check, each check is one call to the unifi protect api. A sane default is 10 or 15 seconds.<br/>
-The `delay` and `retries` fields specify the initial delay between the calls and the amount of retries to the unifi Protect API should any of the calls fail.<br/>
-Each subsequent call will double the previous delay up to the maximum amount of retries specified. 500 milliseconds and 2 retries are a good default.
+- The platform name has to be `Unifi-Protect-Motion` to link to the plugin.
+- The `name` and `room` fields are for the display name and room name inside of the HomeKit app.
+- The `controller` field is the bare url where your unifi protect is hosted (cloud key gen2+), most likely `https://cloud-key-ip:7443`.
+- The `username` and `password` fields are your unifi protect login credentials.
+- The `motionscore` field is the minimum score that will register as a motion event. The default in the unifi protect software is 50 (0 to 100, omit the % sign).
+- The `motioninterval` field is the amount of milliseconds that are between each check, each check is one call to the unifi protect api. A sane default is 10 or 15 seconds.
+- The `delay` and `retries` fields specify the initial delay between the calls and the amount of retries to the unifi Protect API should any of the calls fail.
+  Each subsequent call will double the previous delay up to the maximum amount of retries specified. 500 milliseconds and 2 retries are a good default.
 
 All the motion sensors are automatically enumerated and added as accessories. One for each camera<br/>
 Each motion sensor will be available as a separate accessory in the Home app.
