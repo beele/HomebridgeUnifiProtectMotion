@@ -87,10 +87,11 @@ function UnifiProtectMotionPlatform(log, config, api) {
                             platform.addAccessory(sensor);
                         });
 
+                        platform.log('Done!');
                         return Promise.resolve();
                     })
                     .then(() => {
-                        platform.setMotionCheckInterval();
+                        platform.setMotionCheckInterval(config['motioninterval'] ? config['motioninterval'] : 15000);
                         platform.checkMotion();
                     });
             } else {
@@ -101,6 +102,8 @@ function UnifiProtectMotionPlatform(log, config, api) {
                         for (const sensor of sensors) {
                             platform.addAccessory(sensor);
                         }
+                        platform.log('Done!');
+
                         platform.setMotionCheckInterval();
                         platform.checkMotion();
                     })
@@ -113,8 +116,8 @@ function UnifiProtectMotionPlatform(log, config, api) {
 }
 
 UnifiProtectMotionPlatform.prototype = {
-    setMotionCheckInterval: function () {
-        setInterval(this.checkMotion.bind(this), 15000);
+    setMotionCheckInterval: function (delay) {
+        setInterval(this.checkMotion.bind(this), delay);
     },
 
     checkMotion: function () {
