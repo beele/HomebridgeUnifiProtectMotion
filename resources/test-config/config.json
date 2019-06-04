@@ -15,12 +15,8 @@
       "name": "Unifi motion sensors",
       "room": "Dummy Room",
       "controller": "https://cloud-key-ip:7443",
-      "motionscore": 50,
-      "motioninterval": 10000,
       "username": "user@domain.tld",
-      "password": "password",
-      "delay": 500,
-      "retries": 2
+      "password": "password"
     }
   ]
 }

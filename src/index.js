@@ -43,10 +43,10 @@ function UnifiProtectMotionPlatform(log, config, api) {
     this.flows = new Flows(
         new Unifi(
             config['controller'],
-            config['motionscore'],
-            config['motioninterval'],
-            config['delay'],
-            config['retries'],
+            config['motionscore']       ? config['motionscore']     : 50,
+            config['motioninterval']    ? config['motioninterval']  : 15000,
+            config['delay']             ? config['delay']           : 500,
+            config['retries']           ? config['retries']         : 2,
             log
         ),
         config['username'],

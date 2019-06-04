@@ -1,6 +1,6 @@
 {
   "name": "homebridge-unifi-protect-motion-sensors",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Unifi protected camera motion sensors for domotics integrations with HomeBridge",
   "main": "src/index.js",
   "dependencies": {

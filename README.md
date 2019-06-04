@@ -34,9 +34,12 @@ Config fields:
 - The `controller` field is the bare url where your unifi protect is hosted (cloud key gen2+), most likely `https://cloud-key-ip:7443`.
 - The `username` and `password` fields are your unifi protect login credentials.
 - The `motionscore` field is the minimum score that will register as a motion event. The default in the unifi protect software is 50 (0 to 100, omit the % sign).
+    - This field is optional and will default to 50 if omitted
 - The `motioninterval` field is the amount of milliseconds that are between each check, each check is one call to the unifi protect api. A sane default is 10 or 15 seconds.
+    - This field is optional and will default to 15000ms (15s) if omitted
 - The `delay` and `retries` fields specify the initial delay between the calls and the amount of retries to the unifi Protect API should any of the calls fail.
   Each subsequent call will double the previous delay up to the maximum amount of retries specified. 500 milliseconds and 2 retries are a good default.
+    - Both fields are optional and will default to 500ms and 2
 
 All the motion sensors are automatically enumerated and added as accessories. One for each camera<br/>
 Each motion sensor will be available as a separate accessory in the Home app.
