@@ -1,4 +1,6 @@
 src/experimental
-     .idea
-     .travis.yml
-     *.iml
+.idea
+.travis.yml
+*.iml
+resources/test-config/accessories/
+resources/test-config/persist/
