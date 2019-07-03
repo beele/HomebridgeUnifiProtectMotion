@@ -144,9 +144,11 @@ UnifiProtectMotionPlatform.prototype = {
             for (const accessoryWithMotionInfo of accessoriesWithMotionInfo) {
 
                 if (detectPeople && accessoryWithMotionInfo.context.hasMotion) {
+                    console.log('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg');
                     loadImage('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg')
                         .then((image) => {
-                            return platform.detector.detect(image)
+                            console.log(image);
+                            return platform.detector.detect(image);
                         })
                         .then((results) => {
                             let personDetected = false;
