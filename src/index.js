@@ -1,7 +1,6 @@
 const path = require("path");
 
-const loadCoco = require("tfjs-object-detection-node").loadCoco;
-const loadImage = require("canvas").loadImage;
+const tfjsObjectDetection = require("tfjs-object-detection-node");
 
 const Flows = require("./unifi/flows").Flows;
 const Unifi = require("./unifi/unifi").Unifi;
@@ -99,7 +98,7 @@ function UnifiProtectMotionPlatform(log, config, api) {
                         return Promise.resolve();
                     })
                     .then(() => {
-                        return loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
+                        return tfjsObjectDetection.loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
                     })
                     .then((detector) => {
                         platform.detector = detector;
@@ -116,7 +115,7 @@ function UnifiProtectMotionPlatform(log, config, api) {
                         }
                         platform.log('Done!');
 
-                        return loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
+                        return tfjsObjectDetection.loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
                     })
                     .then((detector) => {
                         platform.detector = detector;
@@ -144,8 +143,7 @@ UnifiProtectMotionPlatform.prototype = {
             for (const accessoryWithMotionInfo of accessoriesWithMotionInfo) {
 
                 if (detectPeople && accessoryWithMotionInfo.context.hasMotion) {
-                    console.log('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg');
-                    loadImage('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg')
+                    tfjsObjectDetection.loadImage('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg')
                         .then((image) => {
                             console.log(image);
                             return platform.detector.detect(image);
