@@ -1,3 +1,8 @@
+const path = require("path");
+
+const loadCoco = require("tfjs-object-detection-node").loadCoco;
+const loadImage = require("canvas").loadImage;
+
 const Flows = require("./unifi/flows").Flows;
 const Unifi = require("./unifi/unifi").Unifi;
 
@@ -15,6 +20,8 @@ See the readme for detailed information
         "password": "password",
         "motionscore": 50,
         "motioninterval": 15000,
+        "detectpeople": true,
+        "detectionthreshold": 30,
         "delay": 500,
         "retries": 2
     }
@@ -39,14 +46,15 @@ function UnifiProtectMotionPlatform(log, config, api) {
 
     this.log = log;
     this.accessories = [];
+    this.detector = null;
 
     this.flows = new Flows(
         new Unifi(
             config['controller'],
-            config['motionscore']       ? config['motionscore']     : 50,
-            config['motioninterval']    ? config['motioninterval']  : 15000,
-            config['delay']             ? config['delay']           : 500,
-            config['retries']           ? config['retries']         : 2,
+            config['motionscore'] ? config['motionscore'] : 50,
+            config['motioninterval'] ? config['motioninterval'] : 15000,
+            config['delay'] ? config['delay'] : 500,
+            config['retries'] ? config['retries'] : 2,
             log
         ),
         config['username'],
@@ -70,13 +78,13 @@ function UnifiProtectMotionPlatform(log, config, api) {
                     })
                     .then((sensors) => {
                         platform.log('Checking for new and removed sensors...');
-                        const toAdd = sensors.filter(function(sensor) {
-                            return !platform.accessories.some(function(accessory) {
+                        const toAdd = sensors.filter(function (sensor) {
+                            return !platform.accessories.some(function (accessory) {
                                 return sensor.id === accessory.context.id;
                             });
                         });
-                        const toRemove = platform.accessories.filter(function(accessory) {
-                            return !sensors.some(function(sensor) {
+                        const toRemove = platform.accessories.filter(function (accessory) {
+                            return !sensors.some(function (sensor) {
                                 return accessory.context.id === sensor.id;
                             });
                         });
@@ -91,9 +99,13 @@ function UnifiProtectMotionPlatform(log, config, api) {
                         return Promise.resolve();
                     })
                     .then(() => {
-                        platform.setMotionCheckInterval(config['motioninterval'] ? config['motioninterval'] : 15000);
-                        platform.checkMotion();
-                    });
+                        return loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
+                    })
+                    .then((detector) => {
+                        platform.detector = detector;
+                        platform.setMotionCheckInterval(config['motioninterval'] ? config['motioninterval'] : 15000, config['detectpeople'], config['detectionthreshold']);
+                        platform.checkMotion(config['detectpeople'], config['detectionthreshold']);
+                    })
             } else {
                 platform.log('No Accessories in cache, creating...');
                 platform.flows
@@ -104,8 +116,12 @@ function UnifiProtectMotionPlatform(log, config, api) {
                         }
                         platform.log('Done!');
 
-                        platform.setMotionCheckInterval();
-                        platform.checkMotion();
+                        return loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
+                    })
+                    .then((detector) => {
+                        platform.detector = detector;
+                        platform.setMotionCheckInterval(config['motioninterval'] ? config['motioninterval'] : 15000, config['detectpeople'], config['detectionthreshold']);
+                        platform.checkMotion(config['detectpeople'], config['detectionthreshold']);
                     })
                     .catch((error) => {
                         platform.log("Could not get sensors: " + error);
@@ -116,15 +132,35 @@ function UnifiProtectMotionPlatform(log, config, api) {
 }
 
 UnifiProtectMotionPlatform.prototype = {
-    setMotionCheckInterval: function (delay) {
-        setInterval(this.checkMotion.bind(this), delay);
+    setMotionCheckInterval: function (delay, detectPeople, detectionThreshold) {
+        setInterval(this.checkMotion.bind(this, detectPeople, detectionThreshold), delay);
     },
 
-    checkMotion: function () {
+    checkMotion: function (detectPeople, detectionThreshold) {
         const platform = this;
 
+        console.log('Checking motion');
         platform.flows.detectMotionFlow(platform.accessories).then((accessoriesWithMotionInfo) => {
             for (const accessoryWithMotionInfo of accessoriesWithMotionInfo) {
+
+                if (detectPeople && accessoryWithMotionInfo.context.hasMotion) {
+                    loadImage('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg')
+                        .then((image) => {
+                            return platform.detector.detect(image)
+                        })
+                        .then((results) => {
+                            let personDetected = false;
+                            for (const result of results) {
+                                if (result.class === 'person' && result.score > (detectionThreshold / 100)) {
+                                    personDetected = true;
+                                    break;
+                                }
+                            }
+                            accessoryWithMotionInfo
+                                .getService(Service.MotionSensor)
+                                .setCharacteristic(Characteristic.MotionDetected, personDetected);
+                        });
+                }
                 accessoryWithMotionInfo
                     .getService(Service.MotionSensor)
                     .setCharacteristic(Characteristic.MotionDetected, accessoryWithMotionInfo.context.hasMotion);
@@ -138,7 +174,7 @@ UnifiProtectMotionPlatform.prototype = {
         const uuid = UUIDGen.generate(sensor.name);
         const newAccessory = new Accessory(sensor.name, uuid);
 
-        newAccessory.context = {id: sensor.id, hasMotion: false};
+        newAccessory.context = {id: sensor.id, ip: sensor.ip, hasMotion: false};
         newAccessory.addService(Service.MotionSensor, sensor.name);
 
         platform.api.registerPlatformAccessories('homebridge-unifi-protect-motion', 'Unifi-Protect-Motion', [newAccessory]);

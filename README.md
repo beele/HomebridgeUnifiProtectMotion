@@ -23,6 +23,8 @@ Next open the config.json that contains your Homebridge configuration and add a 
     "password": "password",
     "motionscore": 50,
     "motioninterval": 15000,
+    "detectpeople": true,
+    "detectionthreshold": 30,
     "delay": 500,
     "retries": 2
 }
@@ -37,6 +39,8 @@ Config fields:
     - This field is optional and will default to 50 if omitted
 - The `motioninterval` field is the amount of milliseconds that are between each check, each check is one call to the unifi protect api. A sane default is 10 or 15 seconds.
     - This field is optional and will default to 15000ms (15s) if omitted
+- The `detectpeople` field a boolean field that indicated whether or not to detect people when motion is detected.
+- The `detectionthreshold` field is the minimum score a detection needs to have to be registered as a person (0 to 100, omit the % sign).
 - The `delay` and `retries` fields specify the initial delay between the calls and the amount of retries to the unifi Protect API should any of the calls fail.
   Each subsequent call will double the previous delay up to the maximum amount of retries specified. 500 milliseconds and 2 retries are a good default.
     - Both fields are optional and will default to 500ms and 2
@@ -58,4 +62,3 @@ Tested with:
   <br/>![CloudKey Gen2 Plus](resources/img/cloudkey-gen2plus.jpg?raw=true "CloudKey Gen2 Plus")
 - 2x Ubiquiti UniFi Video UVC-G3-AF - PoE Camera
   <br/>![Camera UVC-G3-AF](resources/img/camera.jpeg?raw=true "Camera UVC-G3-AF")
-  
