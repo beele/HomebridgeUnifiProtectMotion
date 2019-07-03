@@ -1,5 +1,7 @@
 const path = require("path");
 
+const tfjsObjectDetection = require("tfjs-object-detection-node");
+
 const Flows = require("./unifi/flows").Flows;
 const Unifi = require("./unifi/unifi").Unifi;
 
@@ -40,8 +42,6 @@ module.exports = function (homebridge) {
 function UnifiProtectMotionPlatform(log, config, api) {
     log('Unifi-Protect-Motion Platform Init');
     const platform = this;
-
-    this.tfjsObjectDetection = require("tfjs-object-detection-node");
 
     this.log = log;
     this.accessories = [];
@@ -98,7 +98,7 @@ function UnifiProtectMotionPlatform(log, config, api) {
                         return Promise.resolve();
                     })
                     .then(() => {
-                        return platform.tfjsObjectDetection.loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
+                        return tfjsObjectDetection.loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
                     })
                     .then((detector) => {
                         platform.detector = detector;
@@ -115,7 +115,7 @@ function UnifiProtectMotionPlatform(log, config, api) {
                         }
                         platform.log('Done!');
 
-                        return platform.tfjsObjectDetection.loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
+                        return tfjsObjectDetection.loadCoco(false, path.dirname(require.resolve("tfjs-object-detection-node/package.json")));
                     })
                     .then((detector) => {
                         platform.detector = detector;
@@ -143,7 +143,7 @@ UnifiProtectMotionPlatform.prototype = {
             for (const accessoryWithMotionInfo of accessoriesWithMotionInfo) {
 
                 if (detectPeople && accessoryWithMotionInfo.context.hasMotion) {
-                    platform.tfjsObjectDetection.loadImage('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg')
+                    tfjsObjectDetection.createImage('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg')
                         .then((image) => {
                             console.log(image);
                             return platform.detector.detect(image);
