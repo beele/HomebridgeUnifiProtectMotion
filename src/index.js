@@ -138,14 +138,13 @@ UnifiProtectMotionPlatform.prototype = {
     checkMotion: function (detectPeople, detectionThreshold) {
         const platform = this;
 
-        console.log('Checking motion');
+        platform.log('Checking motion...');
         platform.flows.detectMotionFlow(platform.accessories).then((accessoriesWithMotionInfo) => {
             for (const accessoryWithMotionInfo of accessoriesWithMotionInfo) {
 
                 if (detectPeople && accessoryWithMotionInfo.context.hasMotion) {
                     tfjsObjectDetection.createImage('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg')
                         .then((image) => {
-                            console.log(image);
                             return platform.detector.detect(image);
                         })
                         .then((results) => {
