@@ -138,7 +138,6 @@ UnifiProtectMotionPlatform.prototype = {
     checkMotion: function (detectPeople, detectionThreshold) {
         const platform = this;
 
-        platform.log('Checking motion...');
         platform.flows.detectMotionFlow(platform.accessories).then((accessoriesWithMotionInfo) => {
             for (const accessoryWithMotionInfo of accessoriesWithMotionInfo) {
 
@@ -159,10 +158,11 @@ UnifiProtectMotionPlatform.prototype = {
                                 .getService(Service.MotionSensor)
                                 .setCharacteristic(Characteristic.MotionDetected, personDetected);
                         });
+                } else {
+                    accessoryWithMotionInfo
+                        .getService(Service.MotionSensor)
+                        .setCharacteristic(Characteristic.MotionDetected, accessoryWithMotionInfo.context.hasMotion);
                 }
-                accessoryWithMotionInfo
-                    .getService(Service.MotionSensor)
-                    .setCharacteristic(Characteristic.MotionDetected, accessoryWithMotionInfo.context.hasMotion);
             }
         });
     },
