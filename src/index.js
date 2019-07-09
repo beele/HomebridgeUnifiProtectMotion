@@ -19,8 +19,9 @@ See the readme for detailed information
         "password": "password",
         "motionscore": 50,
         "motioninterval": 15000,
-        "detectpeople": true,
+        "smartdetect": true,
         "detectionthreshold": 30,
+        "detectionclasses": ["person", "cat", "dog"],
         "delay": 500,
         "retries": 2
     }
@@ -46,6 +47,7 @@ function UnifiProtectMotionPlatform(log, config, api) {
     this.log = log;
     this.accessories = [];
     this.detector = null;
+    this.classes = config['detectionclasses'];
 
     this.flows = new Flows(
         new Unifi(
@@ -103,7 +105,7 @@ function UnifiProtectMotionPlatform(log, config, api) {
                     .then((detector) => {
                         platform.detector = detector;
                         platform.setMotionCheckInterval(config['motioninterval'] ? config['motioninterval'] : 15000, config['detectpeople'], config['detectionthreshold']);
-                        platform.checkMotion(config['detectpeople'], config['detectionthreshold']);
+                        platform.checkMotion(config['smartdetect'], config['detectionthreshold']);
                     })
             } else {
                 platform.log('No Accessories in cache, creating...');
@@ -135,13 +137,13 @@ UnifiProtectMotionPlatform.prototype = {
         setInterval(this.checkMotion.bind(this, detectPeople, detectionThreshold), delay);
     },
 
-    checkMotion: function (detectPeople, detectionThreshold) {
+    checkMotion: function (useSmartDetect, detectionThreshold) {
         const platform = this;
 
         platform.flows.detectMotionFlow(platform.accessories).then((accessoriesWithMotionInfo) => {
             for (const accessoryWithMotionInfo of accessoriesWithMotionInfo) {
 
-                if (detectPeople && accessoryWithMotionInfo.context.hasMotion) {
+                if (useSmartDetect && accessoryWithMotionInfo.context.hasMotion) {
                     tfjsObjectDetection.createImage('http://' + accessoryWithMotionInfo.context.ip + '/snap.jpeg')
                         .then((image) => {
                             return platform.detector.detect(image);
@@ -149,7 +151,7 @@ UnifiProtectMotionPlatform.prototype = {
                         .then((results) => {
                             let personDetected = false;
                             for (const result of results) {
-                                if (result.class === 'person' && result.score > (detectionThreshold / 100)) {
+                                if (platform.classes.includes(result.class) && result.score > (detectionThreshold / 100)) {
                                     personDetected = true;
                                     break;
                                 }
