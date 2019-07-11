@@ -151,6 +151,10 @@ UnifiProtectMotionPlatform.prototype = {
                         .then((results) => {
                             let personDetected = false;
                             for (const result of results) {
+
+                                console.log(result.class);
+                                console.log(platform.classes);
+
                                 if (platform.classes.includes(result.class) && result.score > (detectionThreshold / 100)) {
                                     personDetected = true;
                                     break;
