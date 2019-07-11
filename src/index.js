@@ -133,8 +133,8 @@ function UnifiProtectMotionPlatform(log, config, api) {
 }
 
 UnifiProtectMotionPlatform.prototype = {
-    setMotionCheckInterval: function (delay, detectPeople, detectionThreshold) {
-        setInterval(this.checkMotion.bind(this, detectPeople, detectionThreshold), delay);
+    setMotionCheckInterval: function (delay, useSmartDetect, detectionThreshold) {
+        setInterval(this.checkMotion.bind(this, useSmartDetect, detectionThreshold), delay);
     },
 
     checkMotion: function (useSmartDetect, detectionThreshold) {
@@ -149,20 +149,23 @@ UnifiProtectMotionPlatform.prototype = {
                             return platform.detector.detect(image);
                         })
                         .then((results) => {
-                            let personDetected = false;
+                            console.log('Coco finished');
+                            console.log(results);
+
+                            let classDetected = false;
                             for (const result of results) {
 
                                 console.log(result.class);
                                 console.log(platform.classes);
 
                                 if (platform.classes.includes(result.class) && result.score > (detectionThreshold / 100)) {
-                                    personDetected = true;
+                                    classDetected = true;
                                     break;
                                 }
                             }
                             accessoryWithMotionInfo
                                 .getService(Service.MotionSensor)
-                                .setCharacteristic(Characteristic.MotionDetected, personDetected);
+                                .setCharacteristic(Characteristic.MotionDetected, classDetected);
                         });
                 } else {
                     accessoryWithMotionInfo
