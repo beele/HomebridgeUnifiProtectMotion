@@ -104,7 +104,7 @@ function UnifiProtectMotionPlatform(log, config, api) {
                     })
                     .then((detector) => {
                         platform.detector = detector;
-                        platform.setMotionCheckInterval(config['motioninterval'] ? config['motioninterval'] : 15000, config['detectpeople'], config['detectionthreshold']);
+                        platform.setMotionCheckInterval(config['motioninterval'] ? config['motioninterval'] : 15000, config['smartdetect'], config['detectionthreshold']);
                         platform.checkMotion(config['smartdetect'], config['detectionthreshold']);
                     })
             } else {
@@ -121,8 +121,8 @@ function UnifiProtectMotionPlatform(log, config, api) {
                     })
                     .then((detector) => {
                         platform.detector = detector;
-                        platform.setMotionCheckInterval(config['motioninterval'] ? config['motioninterval'] : 15000, config['detectpeople'], config['detectionthreshold']);
-                        platform.checkMotion(config['detectpeople'], config['detectionthreshold']);
+                        platform.setMotionCheckInterval(config['motioninterval'] ? config['motioninterval'] : 15000, config['smartdetect'], config['detectionthreshold']);
+                        platform.checkMotion(config['smartdetect'], config['detectionthreshold']);
                     })
                     .catch((error) => {
                         platform.log("Could not get sensors: " + error);
@@ -149,15 +149,8 @@ UnifiProtectMotionPlatform.prototype = {
                             return platform.detector.detect(image);
                         })
                         .then((results) => {
-                            console.log('Coco finished');
-                            console.log(results);
-
                             let classDetected = false;
                             for (const result of results) {
-
-                                console.log(result.class);
-                                console.log(platform.classes);
-
                                 if (platform.classes.includes(result.class) && result.score > (detectionThreshold / 100)) {
                                     classDetected = true;
                                     break;
