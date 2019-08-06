@@ -10,7 +10,30 @@ To experiment with this plugin:
 - Adjust the dummy config under `resources/test-config`
 - use `npm run debug-plugin` to start a homebridge instance that points to the local config
 
-To install this plugin simple type `sudo npm install homebridge-unifi-protect-motion-sensors -g --unsafe-perm=true`.
+To install execute the following script:
+```bash
+!/bin/bash
+rm -rf unifi-motion-sensors
+rm -rf tfjs-object-detector
+git clone https://github.com/beele/HomebridgeUnifiProtectMotion unifi-motion-sensors
+git clone https://github.com/beele/tfjs-object-detection-node tfjs-object-detector
+cd tfjs-object-detector
+npm run install-debs-raspberry
+sudo npm install -g typescript
+npm install
+tsc
+npm pack
+sudo npm install -g --unsafe-perm=true tfjs-object-detection-node-2.0.0.tgz
+cd ..
+cd unifi-motion-sensors
+git checkout feature/person-detection
+npm install
+npm pack
+sudo npm install -g --unsafe-perm=true homebridge-unifi-protect-motion-sensors-1.1.1.tgz
+cd ..
+echo 'done'
+```
+
 Next open the config.json that contains your Homebridge configuration and add a block like the following one to the platforms array:
 
 ```javascript
@@ -64,4 +87,3 @@ Tested with:
   <br/>![CloudKey Gen2 Plus](resources/img/cloudkey-gen2plus.jpg?raw=true "CloudKey Gen2 Plus")
 - 2x Ubiquiti UniFi Video UVC-G3-AF - PoE Camera
   <br/>![Camera UVC-G3-AF](resources/img/camera.jpeg?raw=true "Camera UVC-G3-AF")
-  
